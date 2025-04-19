@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6bff;
+            --secondary-color: #f8f9fa;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --dark-color: #343a40;
+            --light-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        nav ul li {
+            margin-right: 25px;
+            position: relative;
+        }
+
+        nav ul li:last-child {
+            margin-right: 0;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 5px 0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        nav ul li a:hover {
+            color: #e0e0e0;
+        }
+
+        nav ul li a i {
+            margin-right: 8px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -12px;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .dashboard-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .welcome-message {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3a5bef;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        #task-overview {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .progress-bar {
+            background: var(--primary-color);
+            height: 20px;
+            border-radius: 5px;
+            width: 0;
+            color: white;
+            text-align: center;
+            font-size: 12px;
+            line-height: 20px;
+            transition: width 0.5s ease;
+        }
+
+        .task-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .task-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
+        .task-item.completed {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .task-actions button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .notification-item {
+            background: white;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-item.unread {
+            border-left: 4px solid var(--primary-color);
+            background-color: #f8faff;
+        }
+
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .profile-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input, 
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            nav ul {
+                margin-top: 15px;
+                flex-wrap: wrap;
+            }
+
+            nav ul li {
+                margin-right: 15px;
+                margin-bottom: 10px;
+            }
+
+            .welcome-message {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .welcome-message h2 {
+                margin-bottom: 15px;
+            }
+
+            .profile-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1><i class="fas fa-tasks"></i> Task Manager</h1>
+            <nav>
+                <ul>
+                    <li><a href="#dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="#my-tasks"><i class="fas fa-list"></i> My Tasks</a></li>
+                    <li><a href="#my-profile"><i class="fas fa-user"></i> Profile</a></li>
+                    <li>
+                        <a href="#notifications"><i class="fas fa-bell"></i> Notifications</a>
+                        <span class="notification-badge" id="notification-count">0</span>
+                    </li>
+                    <li><a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="dashboard" class="dashboard-section">
+            <div class="welcome-message">
+                <h2>Welcome back, <span id="username">User</span>!</h2>
+                <button id="add-task-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Add Task</button>
+            </div>
+            
+            <div id="task-overview">
+                <p>You have <span id="task-count" class="badge">0</span> tasks due today.</p>
+                <p><span id="completed-count" class="badge">0</span> completed</p>
+            </div>
+            
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar">0%</div>
+            </div>
+        </section>
+
+        <section id="my-tasks" class="dashboard-section">
+            <h2><i class="fas fa-list-check"></i> My Tasks</h2>
+            <ul id="task-list" class="task-list"></ul>
+        </section>
+
+        <section id="my-profile" class="dashboard-section">
+            <h2><i class="fas fa-user"></i> My Profile</h2>
+            <div class="profile-section">
+                <div class="profile-info">
+                    <div class="profile-pic" id="profile-pic">U</div>
+                    <div class="profile-details">
+                        <p><strong>Name:</strong> <span id="profile-name">User</span></p>
+                        <p><strong>Email:</strong> <span id="profile-email">user@example.com</span></p>
+                        <p><strong>Member since:</strong> <span id="member-since">January 2023</span></p>
+                    </div>
+                </div>
+                <button id="edit-profile-btn" class="btn btn-primary"><i class="fas fa-edit"></i> Edit Profile</button>
+            </div>
+        </section>
+
+        <section id="notifications" class="dashboard-section">
+            <h2><i class="fas fa-bell"></i> Notifications</h2>
+            <button id="clear-notifications" class="btn btn-danger" style="margin-bottom: 15px;"><i class="fas fa-trash"></i> Clear All</button>
+            <ul id="notification-list"></ul>
+        </section>
+    </main>
+
+    <!-- Add Task Modal -->
+    <div id="task-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Task</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="task-form">
+                <div class="form-group">
+                    <label for="task-title">Task Title</label>
+                    <input type="text" id="task-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="task-description">Description</label>
+                    <textarea id="task-description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="task-due-date">Due Date</label>
+                    <input type="date" id="task-due-date">
+                </div>
+                <div class="form-group">
+                    <label for="task-priority">Priority</label>
+                    <select id="task-priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger close-btn">Cancel</button>
+                    <button type="submit" class="btn btn-success">Add Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Profile</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="profile-form">
+                <div class="form-group">
+                    <label for="edit-name">Name</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-email">Email</label>
+                    <input type="email" id="edit-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-pic">Profile Initial</label>
+                    <input type="text" id="edit-pic" maxlength="1" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger close-btn">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; <span id="current-year">2023</span> Task Management System</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const taskList = document.getElementById('task-list');
+            const taskCount = document.getElementById('task-count');
+            const completedCount = document.getElementById('completed-count');
+            const addTaskBtn = document.getElementById('add-task-btn');
+            const notificationList = document.getElementById('notification-list');
+            const notificationCount = document.getElementById('notification-count');
+            const clearNotificationsBtn = document.getElementById('clear-notifications');
+            const progressBar = document.getElementById('progress-bar');
+            const editProfileBtn = document.getElementById('edit-profile-btn');
+            const username = document.getElementById('username');
+            const profileName = document.getElementById('profile-name');
+            const profileEmail = document.getElementById('profile-email');
+            const profilePic = document.getElementById('profile-pic');
+            
+            // Modal elements
+            const taskModal = document.getElementById('task-modal');
+            const profileModal = document.getElementById('profile-modal');
+            const closeBtns = document.querySelectorAll('.close-btn');
+            const taskForm = document.getElementById('task-form');
+            const profileForm = document.getElementById('profile-form');
+            
+            // Data
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+            let profileData = JSON.parse(localStorage.getItem('profile')) || {
+                name: 'User',
+                email: 'user@example.com',
+                pic: 'U',
+                memberSince: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+            };
+            
+            // Initialize
+            updateProfileDisplay();
+            renderTasks();
+            renderNotifications();
+            updateProgress();
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            document.getElementById('member-since').textContent = profileData.memberSince;
+            
+            // Event Listeners
+            addTaskBtn.addEventListener('click', () => {
+                taskModal.style.display = 'flex';
+            });
+            
+            editProfileBtn.addEventListener('click', () => {
+                document.getElementById('edit-name').value = profileData.name;
+                document.getElementById('edit-email').value = profileData.email;
+                document.getElementById('edit-pic').value = profileData.pic;
+                profileModal.style.display = 'flex';
+            });
+            
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    taskModal.style.display = 'none';
+                    profileModal.style.display = 'none';
+                });
+            });
+            
+            clearNotificationsBtn.addEventListener('click', () => {
+                notifications = [];
+                saveNotifications();
+                renderNotifications();
+            });
+            
+            taskForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const title = document.getElementById('task-title').value;
+                const description = document.getElementById('task-description').value;
+                const dueDate = document.getElementById('task-due-date').value;
+                const priority = document.getElementById('task-priority').value;
+                
+                const newTask = {
+                    id: Date.now(),
+                    title,
+                    description,
+                    dueDate,
+                    priority,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                
+                tasks.push(newTask);
+                saveTasks();
+                
+                addNotification(`Task "${title}" added`, 'task');
+                
+                taskForm.reset();
+                taskModal.style.display = 'none';
+                renderTasks();
+            });
+            
+            profileForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                profileData.name = document.getElementById('edit-name').value;
+                profileData.email = document.getElementById('edit-email').value;
+                profileData.pic = document.getElementById('edit-pic').value;
+                
+                saveProfile();
+                updateProfileDisplay();
+                profileModal.style.display = 'none';
+                
+                addNotification('Profile updated', 'profile');
+            });
+            
+            // Task Functions
+            function renderTasks() {
+                taskList.innerHTML = '';
+                
+                if (tasks.length === 0) {
+                    taskList.innerHTML = '<p style="text-align: center; color: #6c757d;">No tasks yet. Add your first task!</p>';
+                    taskCount.textContent = '0';
+                    completedCount.textContent = '0';
+                    return;
+                }
+                
+                const today = new Date().toISOString().split('T')[0];
+                const todayTasks = tasks.filter(task => task.dueDate === today);
+                taskCount.textContent = todayTasks.length;
+                
+                const completedTasks = tasks.filter(task => task.completed).length;
+                completedCount.textContent = completedTasks;
+                
+                tasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                    
+                    li.innerHTML = `
+                        <div>
+                            <span class="task-title">${task.title}</span>
+                            ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
+                            ${task.dueDate ? `<small class="task-due">Due: ${formatDate(task.dueDate)}</small>` : ''}
+                        </div>
+                        <div class="task-actions">
+                            <button class="btn ${task.completed ? 'btn-danger' : 'btn-success'}" data-id="${task.id}">
+                                <i class="fas fa-${task.completed ? 'times' : 'check'}"></i> ${task.completed ? 'Undo' : 'Complete'}
+                            </button>
+                            <button class="btn btn-danger" data-id="${task.id}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    `;
+                    
+                    taskList.appendChild(li);
+                });
+                
+                // Add event listeners to task buttons
+                document.querySelectorAll('.task-actions button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const taskId = parseInt(button.getAttribute('data-id'));
+                        const taskIndex = tasks.findIndex(t => t.id === taskId);
+                        
+                        if (button.textContent.includes('Complete') || button.textContent.includes('Undo')) {
+                            // Toggle completion status
+                            tasks[taskIndex].completed = !tasks[taskIndex].completed;
+                            addNotification(
+                                `Task "${tasks[taskIndex].title}" marked as ${tasks[taskIndex].completed ? 'completed' : 'incomplete'}`,
+                                'task'
+                            );
+                        } else {
+                            // Delete task
+                            const deletedTask = tasks[taskIndex];
+                            tasks.splice(taskIndex, 1);
+                            addNotification(`Task "${deletedTask.title}" deleted`, 'task');
+                        }
+                        
+                        saveTasks();
+                        renderTasks();
+                        updateProgress();
+                    });
+                });
+            }
+            
+            function renderNotifications() {
+                notificationList.innerHTML = '';
+                
+                if (notifications.length === 0) {
+                    notificationList.innerHTML = '<p style="text-align: center; color: #6c757d;">No notifications yet.</p>';
+                    notificationCount.textContent = '0';
+                    return;
+                }
+                
+                notificationCount.textContent = notifications.length;
+                
+                // Show only the last 10 notifications
+                const recentNotifications = notifications.slice(-10).reverse();
+                
+                recentNotifications.forEach(notification => {
+                    const li = document.createElement('li');
+                    li.className = 'notification-item';
+                    
+                    const now = new Date();
+                    const notificationDate = new Date(notification.timestamp);
+                    const timeDiff = Math.floor((now - notificationDate) / 1000); // in seconds
+                    
+                    let timeText;
+                    if (timeDiff < 60) {
+                        timeText = `${timeDiff} seconds ago`;
+                    } else if (timeDiff < 3600) {
+                        timeText = `${Math.floor(timeDiff / 60)} minutes ago`;
+                    } else if (timeDiff < 86400) {
+                        timeText = `${Math.floor(timeDiff / 3600)} hours ago`;
+                    } else {
+                        timeText = notificationDate.toLocaleDateString();
+                    }
+                    
+                    li.innerHTML = `
+                        <div>
+                            <p>${notification.message}</p>
+                            <small>${timeText}</small>
+                        </div>
+                        <button class="btn btn-danger" data-id="${notification.id}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    notificationList.appendChild(li);
+                });
+                
+                // Add event listeners to delete buttons
+                document.querySelectorAll('#notification-list button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const notificationId = button.getAttribute('data-id');
+                        notifications = notifications.filter(n => n.id != notificationId);
+                        saveNotifications();
+                        renderNotifications();
+                    });
+                });
+            }
+            
+            function updateProgress() {
+                if (tasks.length === 0) {
+                    progressBar.style.width = '0%';
+                    progressBar.textContent = '0%';
+                    return;
+                }
+                
+                const completed = tasks.filter(task => task.completed).length;
+                const progress = Math.round((completed / tasks.length) * 100);
+                
+                progressBar.style.width = `${progress}%`;
+                progressBar.textContent = `${progress}%`;
+            }
+            
+            function addNotification(message, type) {
+                const notification = {
+                    id: Date.now(),
+                    message,
+                    type,
+                    timestamp: new Date().toISOString()
+                };
+                
+                notifications.push(notification);
+                saveNotifications();
+                renderNotifications();
+            }
+            
+            function updateProfileDisplay() {
+                username.textContent = profileData.name;
+                profileName.textContent = profileData.name;
+                profileEmail.textContent = profileData.email;
+                profilePic.textContent = profileData.pic;
+            }
+            
+            function formatDate(dateString) {
+                if (!dateString) return '';
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString('en-US', options);
+            }
+            
+            // Local Storage Functions
+            function saveTasks() {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+            
+            function saveNotifications() {
+                localStorage.setItem('notifications', JSON.stringify(notifications));
+            }
+            
+            function saveProfile() {
+                localStorage.setItem('profile', JSON.stringify(profileData));
+            }
+        });
+    </script>
+</body>
+</html>
